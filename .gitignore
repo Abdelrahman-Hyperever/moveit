@@ -61,3 +61,4 @@ qtcreator-*
 
 _build
 _autosummary
+/moveit_ros/visualization/src/moveit_ros_visualization/bkp
