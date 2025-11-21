@@ -66,15 +66,21 @@ private:
   void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
   {
     // Cartesian servoing with the axes
+    // Scale factors to convert from normalized [-1,1] to m/s and rad/s
+    // Increased scaling for better responsiveness with small Space Navigator movements
+    const double linear_scale = 10.0;   // m/s max linear velocity (increased from 0.6)
+    const double rotational_scale = 6.0; // rad/s max angular velocity (increased from 0.3)
+    
     geometry_msgs::TwistStamped twist;
     twist.header.stamp = ros::Time::now();
-    twist.twist.linear.x = msg->axes[0];
-    twist.twist.linear.y = msg->axes[1];
-    twist.twist.linear.z = msg->axes[2];
+    // Scale and map axes: X, Y forward/back, Z inverted (push down = move up)
+    twist.twist.linear.x = msg->axes[0] * linear_scale;
+    twist.twist.linear.y = msg->axes[1] * linear_scale;
+    twist.twist.linear.z = -msg->axes[2] * linear_scale;  // Inverted: push down = move up
 
-    twist.twist.angular.x = msg->axes[3];
-    twist.twist.angular.y = msg->axes[4];
-    twist.twist.angular.z = msg->axes[5];
+    twist.twist.angular.x = msg->axes[3] * rotational_scale;
+    twist.twist.angular.y = msg->axes[4] * rotational_scale;
+    twist.twist.angular.z = msg->axes[5] * rotational_scale;
 
     // Joint servoing with the buttons
     control_msgs::JointJog joint_deltas;

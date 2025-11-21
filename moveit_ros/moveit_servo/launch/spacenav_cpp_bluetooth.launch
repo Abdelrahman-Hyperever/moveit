@@ -1,0 +1,25 @@
+<launch>
+  <!-- Modified version of spacenav_cpp.launch for Bluetooth Space Navigator
+       Uses standard ROS joy node instead of spacenav_node since spacenavd
+       doesn't recognize Bluetooth Space Navigator devices properly.
+  -->
+
+  <arg name="config" default="$(find moveit_servo)/config/ur_simulated_config.yaml"/>
+  <arg name="joy_dev" default="/dev/input/js1" doc="Space Navigator device path (js1 for Bluetooth)"/>
+
+  <!-- Use standard joy node to read from the Bluetooth Space Navigator -->
+  <node pkg="joy" type="joy_node" name="spacenav_node" output="screen">
+    <param name="dev" value="$(arg joy_dev)"/>
+    <param name="deadzone" value="0.01" />
+    <param name="autorepeat_rate" value="100" />
+    <remap from="joy" to="spacenav/joy" />
+  </node>
+
+  <node name="spacenav_to_twist" pkg="moveit_servo" type="spacenav_to_twist" output="screen" />
+
+  <node name="servo_server" pkg="moveit_servo" type="servo_server" output="screen" >
+    <rosparam command="load" file="$(arg config)"/>
+  </node>
+
+</launch>
+
